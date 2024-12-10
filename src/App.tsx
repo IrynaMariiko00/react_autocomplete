@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
 
 type Props = {
   onDebounce?: (delay: number) => void;
-  onSelected?: (person: Person[] | null) => void;
+  onSelected?: (person: Person | null) => void;
   debounceDelay?: number;
 };
 
@@ -19,7 +19,7 @@ export const App: React.FC<Props> = ({
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isListVisible, setIsListVisible] = useState(true);
 
-  const debouncedSearch = useMemo(() => {
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
       onDebounce?.(debounceDelay);
     }, debounceDelay);
@@ -37,15 +37,13 @@ export const App: React.FC<Props> = ({
     if (selectedPerson && selectedPerson.name !== event.target.value) {
       setSelectedPerson(null);
     }
-
-    debouncedSearch();
   };
 
   const handlePersonSelect = (person: Person) => {
     setSelectedPerson(person);
     setQuery(person.name);
     setIsListVisible(false);
-    onSelected?.([person]);
+    onSelected?.(person); // Передаємо об'єкт `Person` напряму
   };
 
   return (
@@ -56,7 +54,6 @@ export const App: React.FC<Props> = ({
             ? `${selectedPerson.name} (${selectedPerson.born} - ${selectedPerson.died})`
             : 'No selected person'}
         </h1>
-
         {isListVisible && filteredPeople.length === 0 && (
           <div data-cy="no-suggestions-message">No matching suggestions</div>
         )}
